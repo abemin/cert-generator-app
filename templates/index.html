@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Certificate Generator</h1>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label>Common Name (CN)</label>
+                    <input type="text" class="form-control" name="common_name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Additional DNS Names (comma-separated)</label>
+                    <input type="text" class="form-control" name="dns_alt">
+                </div>
+
+                <div class="mb-3">
+                    <label>IP Addresses (comma-separated)</label>
+                    <input type="text" class="form-control" name="ip_alt">
+                </div>
+
+                <div class="mb-3">
+                    <label>Key Algorithm</label>
+                    <select name="key_algo" class="form-select">
+                        <option value="RSA" selected>RSA</option>
+                        <option value="ECDSA">ECDSA (prime256v1)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>RSA Key Size (ignored if ECDSA selected)</label>
+                    <select name="key_size" class="form-select">
+                        <option value="2048" selected>2048 bits</option>
+                        <option value="4096">4096 bits</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Certificate Validity Period (days)</label>
+                    <input type="number" class="form-control" name="validity_days" value="365" min="1">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Generate Certificate</button>
+            </form>
+        </div>
+    </div>
+
+    {% if zip_file %}
+    <div class="card shadow mt-4">
+        <div class="card-body">
+            <h3>Download Package</h3>
+            <ul>
+                <li><a href="{{ url_for('download_file', filename=zip_file) }}">Download ZIP File (CRT + KEY + CA)</a></li>
+            </ul>
+            <p class="text-muted">
+                Note: Files will be deleted after 1 hour.<br>
+                Install the included <strong>ca.crt</strong> on your device to avoid browser SSL warnings.<br>
+		Only for lab usage.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
+
