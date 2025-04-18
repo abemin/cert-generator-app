@@ -1,0 +1,9 @@
+services:
+  certgen:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./certs:/app/certs
+      - ./ca:/app/ca
+    restart: always
