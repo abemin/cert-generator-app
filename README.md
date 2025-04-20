@@ -43,7 +43,7 @@ cert_web/
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/cert-generator-app.git
+git clone https://github.com/abemin/cert-generator-app.git
 cd cert-generator-app
 ```
 2. Prepare your CA Files
