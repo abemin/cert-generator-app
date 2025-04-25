@@ -57,11 +57,11 @@ ca.key — Your CA private key
 
 3. Build and Run using Docker Compose
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 or to run as daemon
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 The app will be available at:
 👉 http://your-server-ip:5000
