@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for, session
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, session, send_file
 import subprocess
 import os
 import datetime
@@ -69,6 +69,7 @@ def index():
         crt_file = os.path.join(CERT_FOLDER, f"{filename_base}.crt")
         ext_file = os.path.join(CERT_FOLDER, f"{filename_base}.ext")
         zip_file = os.path.join(CERT_FOLDER, f"{filename_base}.zip")
+        pfx_file = os.path.join(CERT_FOLDER, f"{filename_base}.pfx")
 
         # 1. Generate private key based on selected algorithm
         if key_algo == 'RSA':
@@ -111,13 +112,24 @@ def index():
             '-passin', f'pass:{CA_PASSWORD}'
         ], check=True)
 
-        # 5. Create ZIP file including: private key, cert, and CA cert
+        # 5. Create PKCS#12 (.pfx) file
+        subprocess.run([
+            'openssl', 'pkcs12', '-export',
+            '-out', pfx_file,
+            '-inkey', key_file,
+            '-in', crt_file,
+            '-certfile', CA_CERT,
+            '-password', 'pass:passwd2025'
+        ], check=True)
+
+        # 6. Create ZIP file including: private key, cert, CA cert, and .pfx
         with zipfile.ZipFile(zip_file, 'w') as zf:
             zf.write(key_file, arcname=os.path.basename(key_file))
             zf.write(crt_file, arcname=os.path.basename(crt_file))
             zf.write(CA_CERT, arcname='ca.crt')
+            zf.write(pfx_file, arcname=os.path.basename(pfx_file))
 
-        return render_template('index.html', zip_file=os.path.basename(zip_file))
+        return render_template('index.html', zip_file=os.path.basename(zip_file), pfx_file=os.path.basename(pfx_file))
 
     return render_template('index.html')
 
@@ -125,10 +137,10 @@ def index():
 def download_file(filename):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    
-    if not filename.endswith('.zip'):
+
+    if not filename.endswith('.zip') and not filename.endswith('.pfx'):
         return "Not allowed", 403
-    
+
     return send_from_directory(CERT_FOLDER, filename, as_attachment=True)
 
 @app.route('/logout')
@@ -138,4 +150,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-
